@@ -7,7 +7,7 @@ app.use(express.json());
 
 
 const init = async () => {
-  try {
+ 
     console.log("connecting to database")
     await client.connect();
     console.log("connected to database")
@@ -20,9 +20,6 @@ const init = async () => {
       console.log(`listening on port ${PORT}`)
     }) */
     
-  } catch (error) {
-    next(error)
-  }
 } 
 
 init();

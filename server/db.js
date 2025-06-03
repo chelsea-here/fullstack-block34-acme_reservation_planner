@@ -4,14 +4,35 @@ const client = new pg.Client(process.env.DATABASE_URL || "postgres://localhost/t
 const {v4} = require('uuid');
 const uuidv4 = v4;
 
-/* const createCustomer = async (customer) => {
+const createCustomer = async (customer) => {
   const SQL = `
-  DROP IF EXISTS ;
-  CREATE TABLE table (
-  )
-  `
+    INSERT INTO customers(id, name)
+    VALUES ($1, $2)
+    RETURNING *
+  ;`
+  const response = await client.query(SQL, [uuidv4(), customer.name]);
+  return response.rows[0];
+}
 
-} */
+const createRestaurant = async (restaurant) => {
+  const SQL = `
+    INSERT INTO restaurants(id, name)
+    VALUES ($1, $2)
+    RETURNING *
+  ;`
+  const response = await client.query(SQL, [uuidv4(), restaurant.name]);
+  return response.rows[0];
+}
+
+const createReservation = async (reservation) => {
+  const SQL = `
+    INSERT INTO reservations (id, customer_id, restaurant_id, party_count)
+    VALUES ($1, $2, $3, $4)
+    RETURNING *
+    `
+  const response = await client.query(SQL, [uuidv4(), reservation.customer_id, reservation.restaurant_id, reservation.party_count])
+  return response.rows[0];
+}
 
 const seed = async () => {
   const SQL = `
@@ -39,9 +60,22 @@ const seed = async () => {
     `
   await client.query(SQL);
   console.log('created tables');
-
-
-}
+  
+  const [moe, lucy, larry, ethyl, parisEats, londonEats, nycEats] = await Promise.all([
+        createCustomer({ name: 'moe'}),
+        createCustomer({ name: 'lucy'}),
+        createCustomer({ name: 'larry'}),
+        createCustomer({ name: 'ethyl'}),
+        createRestaurant({ name: 'parisEats'}),
+        createRestaurant({ name: 'londonEats'}),
+        createRestaurant({ name: 'nycEats'}),
+    ]);
+  
+    await Promise.all([
+      createReservation({customer_id: lucy.id, restaurant_id: parisEats.id, party_count: 5})
+    ])
+    console.log('seeded data')
+};  
 
 module.exports = {
   client, 
