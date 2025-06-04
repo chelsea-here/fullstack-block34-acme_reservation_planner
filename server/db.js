@@ -24,21 +24,56 @@ const createRestaurant = async (restaurant) => {
   return response.rows[0];
 }
 
-const createReservation = async (reservation) => {
+const createReservation = async ({customer_id, restaurant_id, party_count}) => {
   const SQL = `
     INSERT INTO reservations (id, customer_id, restaurant_id, party_count)
     VALUES ($1, $2, $3, $4)
     RETURNING *
     `
-  const response = await client.query(SQL, [uuidv4(), reservation.customer_id, reservation.restaurant_id, reservation.party_count])
+  const response = await client.query(SQL, [uuidv4(), customer_id, restaurant_id, party_count]);
   return response.rows[0];
+}
+
+const fetchCustomers = async () => {
+    const SQL = `
+        SELECT *
+        FROM customers
+    `
+    const response = await client.query(SQL)
+    return response.rows
+}
+
+const fetchRestaurants = async () => {
+    const SQL = `
+        SELECT *
+        FROM restaurants
+    `
+    const response = await client.query(SQL)
+    return response.rows
+}
+
+const fetchReservations = async () => {
+    const SQL = `
+        SELECT *
+        FROM reservations
+    `
+    const response = await client.query(SQL)
+    return response.rows
+}
+
+const destroyReservation = async (id) => {
+  const SQL = `
+    DELETE FROM reservations
+    WHERE id = $1
+    `
+    await client.query(SQL, [id])
 }
 
 const seed = async () => {
   const SQL = `
     DROP TABLE IF EXISTS reservations;
     DROP TABLE IF EXISTS restaurants;
-    DROP TABLE IF EXISTS customers;
+    DROP TABLE IF EXISTS customers; 
 
     CREATE TABLE customers(
       id UUID PRIMARY KEY,
@@ -79,5 +114,12 @@ const seed = async () => {
 
 module.exports = {
   client, 
-  seed
+  seed,
+  createCustomer,
+  createRestaurant,
+  createReservation,
+  fetchCustomers,
+  fetchRestaurants,
+  fetchReservations,
+  destroyReservation
 };
