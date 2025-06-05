@@ -61,12 +61,12 @@ const fetchReservations = async () => {
     return response.rows
 }
 
-const destroyReservation = async (id) => {
+const destroyReservation = async (id, customer_id) => {
   const SQL = `
     DELETE FROM reservations
-    WHERE id = $1
+    WHERE id = $1 AND customer_id = $2
     `
-    await client.query(SQL, [id])
+    await client.query(SQL, [id, customer_id]);
 }
 
 const seed = async () => {
@@ -107,7 +107,8 @@ const seed = async () => {
     ]);
   
     await Promise.all([
-      createReservation({customer_id: lucy.id, restaurant_id: parisEats.id, party_count: 5})
+      createReservation({customer_id: lucy.id, restaurant_id: parisEats.id, party_count: 5}),
+      createReservation({customer_id: larry.id, restaurant_id: nycEats.id, party_count: 2})
     ])
     console.log('seeded data')
 };  
